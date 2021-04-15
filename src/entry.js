@@ -118,7 +118,7 @@ loader.load(pugModel, object => {
   walkAction.play();
   mixers.push(mixer);
 
-  object.scale.multiplyScalar(0.1);
+  object.scale.multiplyScalar(0.2);
   pug = new THREE.Object3D();
   pug.add(object);
 
