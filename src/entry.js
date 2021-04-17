@@ -13,6 +13,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import pugModel from './assets/models/pug/pug.fbx';
 
+
 const clock = new THREE.Clock();
 let mixers = [];
 //import SeedScene from './objects/Scene.js';
@@ -40,20 +41,24 @@ function onDocumentKeyDown(event) {
     let forward = (pug.userData.move!==undefined) ? pug.userData.move.forward : 0;
     let turn = (pug.userData.move!==undefined) ?  pug.userData.move.turn : 0;
 
-
-    switch(keyCode){
-      case 87://W
+    console.log(keyCode);
+    switch(keyCode){      
+      case 87:
+      case 38://W
         forward = 1;
         moving = true;
         break;
-      case 83://S
+      case 83:
+      case 40://S
         forward = -1;
         moving = true;
         break;
-      case 65://A
+      case 65:
+      case 37://A
         turn = 1; 
         break;
-      case 68://D
+      case 68:
+      case 39://D
         turn = -1;            
         break;
     }
@@ -70,13 +75,17 @@ function onDocumentKeyUp(event) {
   let turn = (pug.userData && pug.userData.move!==undefined) ?  pug.userData.move.turn : 0;
   
   switch(event.keyCode){
-    case 87://W
-    case 83://S
+    case 87:
+    case 38://W
+    case 83:
+    case 40://S
       forward = 0;
       moving = false;
       break;
-    case 65://A
-    case 68://D
+    case 65:
+    case 37://A
+    case 68:
+    case 39://D
       turn = 0;
       
       break;
