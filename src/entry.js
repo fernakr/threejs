@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import pugModel from './assets/models/pug/pug.fbx';
+import treatModel from './assets/models/treat/treat.fbx';
 
 
 const clock = new THREE.Clock();
@@ -20,6 +21,7 @@ let mixers = [];
 
 let pug, cameraPug, controls;
 let lights = {}
+let treats = [];
 
 let moving = false, currAnimation;
 
@@ -255,6 +257,30 @@ const animationIndex = [
     end:  2750
   }
 ]
+
+loader.load(treatModel, object => {
+  object.traverse(child => {
+    if (child.isMesh) {
+      child.material.side = THREE.DoubleSide;
+      child.material.shininess = 0.1;
+      child.castShadow = true;
+    }
+  })
+  object.scale.multiplyScalar(0.05);
+
+  for (let i = 0; i < 20; i++){
+    const treat = object.clone();
+    
+    scene.add(treat);
+    treat.position.x = Math.random() * 20 - 1;
+    treat.rotation.y = Math.random() * 20 - 1;
+    treat.position.z = Math.random() * 20 - 1;
+    //treat.position.normalize();
+    //treat.position.multiplyScalar( 10 );
+    treats.push(treat);
+  }
+  
+})
 loader.load(pugModel, object => {
   object.traverse(child => {
     if (child.isMesh) {
@@ -263,6 +289,7 @@ loader.load(pugModel, object => {
       child.castShadow = true;
     }
   })
+  
 
   
   const totalClip = object.animations[8];
