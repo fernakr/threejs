@@ -17,25 +17,35 @@ import treatModel from './assets/models/treat/treat.fbx';
 
 const groundMat = new CANNON.Material();
 const pugMat = new CANNON.Material();
-const letterMat = new CANNON.Material();
+const objectMat = new CANNON.Material();
 
-const contactMaterial = new CANNON.ContactMaterial(groundMat, letterMat, {
-    friction: 10
+const contactMaterial = new CANNON.ContactMaterial(groundMat, objectMat, {
+    friction: 0.3,
+    restitution: 0.1
 });
 
 
 
-const contactMaterial2 = new CANNON.ContactMaterial(letterMat, letterMat, {
-  friction: 20
+const contactMaterial2 = new CANNON.ContactMaterial(objectMat, objectMat, {
+  friction: 1,
+  restitution: 0.1
 });
 
 const contactMaterial3 = new CANNON.ContactMaterial(groundMat, pugMat, {
-  friction: 10
+  friction: 0.2,
+  restitution: 0,
+  contactEquationStiffness: 1e12,
+  contactEquationRelaxation: 3,
+  frictionEquationStiffness: 1e8,
+  frictionEquationRegularizationTime: 0.1,
+  contactEquationRegularizationTime: 0.2,
+
 });
 
 
-const contactMaterial4 = new CANNON.ContactMaterial(letterMat, pugMat, {
-  friction: 10
+const contactMaterial4 = new CANNON.ContactMaterial(objectMat, pugMat, {
+  friction: 10,
+  restitution: 0.2
 });
 
 
@@ -379,7 +389,7 @@ const playerControl = (forward, turn) => {
       pug.userData.move.forward = forward;
       pug.userData.move.turn = turn;
     }else{
-      pug.userData.move = { forward, turn, time: clock.getElapsedTime(), speed: 20 };         
+      pug.userData.move = { forward, turn, time: clock.getElapsedTime(), speed: 23 };         
     }
   }
 }
@@ -450,8 +460,8 @@ const updateAnimation = () => {
   if (moving) {
     newAnimation = 'walk';  
     if (pug.userData.move){
-      if (pug.userData.move.speed > 10) newAnimation = 'run';
-      if (pug.userData.move.speed > 15) newAnimation = 'sprint';
+      if (pug.userData.move.speed > 30) newAnimation = 'run';
+      if (pug.userData.move.speed > 40) newAnimation = 'sprint';
     }    
   }
   
@@ -526,8 +536,8 @@ const addBushes = () => {
     mesh.position.y = 2;
     scene.add(mesh);
 
-    const sphereShape = new CANNON.Box(new CANNON.Vec3(4, 4, 4))
-    const sphereBody = new CANNON.Body({ mass: 0, material: letterMat});
+    const sphereShape = new CANNON.Box(new CANNON.Vec3(2, 2, 2))
+    const sphereBody = new CANNON.Body({ mass: 0, material: objectMat});
     sphereBody.addShape(sphereShape)
     sphereBody.position.x = mesh.position.x
     sphereBody.position.y = mesh.position.y
@@ -589,17 +599,17 @@ const addPug = () => {
     object.scale.multiplyScalar(0.2);
     object.rotateY(Math.PI/2);
     pug = new THREE.Object3D();  
-    // pug.position.x = -20;
+    pug.position.x = -20;
     // pug.position.y = 0.5;
     pug.add(object);  
 
     const pugShape = new CANNON.Box(new CANNON.Vec3(4.5, 3, 1.3))
-    pugBody = new CANNON.Body({ mass: 1, material: pugMat});
+    pugBody = new CANNON.Body({ mass: 80, material: pugMat});
     pugBody.addShape(pugShape)
     pugBody.angularDamping = 1;
 
     pugBody.fixedRotation = true
-    pugBody.position.set(0,0,0);
+    pugBody.position.set(-20,0,0);
     world.addBody(pugBody)
       
   
@@ -642,7 +652,7 @@ const addTreats = () => {
       //treat.position.normalize();
       //treat.position.multiplyScalar( 10 );
       const treatShape = new CANNON.Box(new CANNON.Vec3(.5, .5, .5))
-      treat.body = new CANNON.Body({ mass: 1, material: letterMat });
+      treat.body = new CANNON.Body({ mass: 10, material: objectMat });
       treat.body.addShape(treatShape)
       treat.body.position.x = treat.position.x
       treat.body.position.y = treat.position.y
@@ -680,21 +690,29 @@ const onAnimationFrameHandler = () => {
   })      
 
   if (pug) {    
-    pug.position.set(pugBody.position.x, pugBody.position.y-3, pugBody.position.z);
+    // let newPos = pugBody.position.clone();
+    // newPos.y = 0;
+    //pugBody.position.lerp(pugBody.position, alpha, newPos);
+    pugBody.position.y = 3.75;
+    pug.position.set(pugBody.position.x, 0, pugBody.position.z);
     pug.quaternion.set(pugBody.quaternion.x, pugBody.quaternion.y, pugBody.quaternion.z, pugBody.quaternion.w);
 
     if(pug.userData.move !== undefined && pugBody.position){
     
-      if (pug.userData.move.forward > 0 && pug.userData.move.speed < 40) pug.userData.move.speed += 0.1;          
+      if (pug.userData.move.forward > 0 && pug.userData.move.speed < 60) pug.userData.move.speed += 0.1;          
 
-      let forwardVector = new THREE.Vector3(1,0,0).multiplyScalar(pug.userData.move.forward * pug.userData.move.speed);
+      let forwardVector = new THREE.Vector3(1,0,0).multiplyScalar( pug.userData.move.forward * pug.userData.move.speed);
       var forwardPoint = new CANNON.Vec3(-10,0,0);
 
-      let turnVector = new THREE.Vector3(0,0,-0.5).multiplyScalar(pug.userData.move.turn * pug.userData.move.speed);
-      let turnPoint = new CANNON.Vec3(30,0,0);
+      let turnVector1 = new THREE.Vector3(0,0,-40).multiplyScalar(pug.userData.move.turn * pug.userData.move.speed);
+      let turnVector2 = new THREE.Vector3(40,0,0).multiplyScalar(pug.userData.move.turn * pug.userData.move.speed);
 
-      pugBody.applyLocalForce(forwardVector, forwardPoint);
-      pugBody.applyLocalForce(turnVector, turnPoint);
+      let turnPoint1 = new CANNON.Vec3(30,0,0);
+      let turnPoint2 = new CANNON.Vec3(-30,0,0);
+
+      pugBody.applyImpulse(forwardVector, forwardPoint);
+      pugBody.applyLocalForce(turnVector1, turnPoint1);
+      pugBody.applyLocalForce(turnVector2, turnPoint2);
 
       //pugBody.position.x += pug.userData.move.forward * dt * pug.userData.move.speed;      
 
