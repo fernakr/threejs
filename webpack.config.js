@@ -12,6 +12,9 @@ module.exports = {
   mode: 'development',
   target: 'web',
   devtool: 'source-map',
+  // resolve: {
+  //   extensions: ['.tsx', '.ts', '.js']
+  // },
   module: {
     rules: [
       {
