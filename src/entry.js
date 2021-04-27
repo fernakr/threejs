@@ -339,7 +339,7 @@ const MainScene = () => {
     },
     {
       name: 'jump',
-      start: 300,
+      start: 310,
       end:  340
     },
     {
@@ -586,6 +586,7 @@ const MainScene = () => {
     plane.position.y = 0;
     scene.add(plane);
     scene.fog = new THREE.Fog(clearColor,60,100);
+    
     physics.add.ground({ width: 2000, height: 2000 })
   }
 
@@ -624,6 +625,15 @@ const MainScene = () => {
 
       pug.add(object);
       physics.add.existing(pug);
+      pug.body.setAngularFactor( 0, 1, 0 );
+      pug.body.on.collision((otherObject, event) => {
+        //console.log(otherObject.name);
+        if (otherObject.name === 'body_id_19') {
+          pug.userData.jumping = false;
+          if (pug.userData.move) pug.userData.move.jump = false;
+          updateAnimation();
+        }
+      })
       //pug.body.setCollisionFlags(2) // make it kinematic
 
 
@@ -716,25 +726,21 @@ const MainScene = () => {
 
     if (pug) {
       console.log(pug.position.y);
-      if (pug.userData.jumping && pug.position.y < 1) {
-        console.log('end jump')
-        pug.userData.jumping = false;
-        pug.userData.move.jump = false;
-        updateAnimation();
-      }
+      
       if(pug.userData.move){
         if (pug.userData.move.forward > 0 && pug.userData.move.speed < 60) pug.userData.move.speed += 1;
 
 
         if (pug.userData.move.jump && !pug.userData.jumping) {
 //            console.log('jump')
-          pug.body.applyForceY(6);
           pug.userData.move.jump = false;
           pug.userData.jumping = true;
+          pug.body.applyForceY(6);
+          
 
         }
 
-        if (pug.userData.move.forward) {
+        if (pug.userData.move.forward && !pug.userData.jumping) {
           const speed = pug.userData.move.speed
           const rotation = pug.getWorldDirection(pug.rotation.toVector3())
           const theta = Math.atan2(rotation.x, rotation.z)
@@ -745,8 +751,8 @@ const MainScene = () => {
 
           pug.body.setVelocity(x, y, z)
         }
-        //console.log('move');
-        pug.body.setAngularVelocityY(-1*pug.userData.move.turn)
+        const turnFactor = pug.userData.move.forward >= 0 ? -1 : 1;
+        pug.body.setAngularVelocityY(turnFactor*pug.userData.move.turn )
       }
 
       if (!pug.userData.move || pug.userData.move.turn === 0) pug.body.setAngularVelocityY(0);
