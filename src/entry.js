@@ -37,6 +37,13 @@ const MainScene = () => {
   const cameraPug =  new THREE.PerspectiveCamera(20);
   const renderer = new THREE.WebGLRenderer({antialias: true});
 
+  let timeRemaining = 30;
+  const timeElem = document.getElementById('time');
+  let paused = false;
+
+  let health, currHealth = 100;
+  const healthElem = document.getElementById('healthbar');  
+
   // physics
   const physics = new AmmoPhysics(scene)
   physics.debug.enable()
@@ -487,6 +494,22 @@ const MainScene = () => {
     physics.update(dt * 1000)
     physics.updateDebugger()
 
+    
+
+    timeRemaining -= clock.getElapsedTime()/1000;
+    timeElem.textContent = timeRemaining.toFixed(2);
+
+//    console.log(healthElem);
+    if (health !== currHealth){
+      healthElem.style.width = health + '%';
+      currHealth = health;
+    }
+    
+
+    if (timeRemaining <= 0 && !paused){
+      alert('game over');
+      paused = true;
+    }
     renderer.render(scene, cameraPug);
     window.requestAnimationFrame(onAnimationFrameHandler);
   }
