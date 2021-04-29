@@ -41,12 +41,13 @@ const MainScene = () => {
   const timeElem = document.getElementById('time');
   let paused = false;
 
-  let health, currHealth = 100;
+  let health = 100;
+  let currHealth;
   const healthElem = document.getElementById('healthbar');  
 
   // physics
   const physics = new AmmoPhysics(scene)
-  physics.debug.enable()
+  //physics.debug.enable()
 
   //const { factory } = physics
 
@@ -492,7 +493,7 @@ const MainScene = () => {
       controls.update();
     }
     physics.update(dt * 1000)
-    physics.updateDebugger()
+    //physics.updateDebugger()
 
     
 
