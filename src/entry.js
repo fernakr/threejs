@@ -15,8 +15,8 @@ import { AmmoPhysics, ExtendedMesh, PhysicsLoader } from '@enable3d/ammo-physics
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
-import pugModel from './assets/models/pug/pug.fbx';
-import treatModel from './assets/models/treat/treat.fbx';
+//import pugModel from './assets/models/pug/pug.fbx';
+//import treatModel from './assets/models/treat/treat.fbx';
 //import ammoLib from './assets/ammo/ammo.wasm.js';
 
 
@@ -24,7 +24,7 @@ const MainScene = () => {
 
   // init global vars
   let mixers = [];
-  let pug, controls, pugBody;
+  let pug, controls;
   let lights = {}
   let treats = [];
   let moving = false, currAnimation;
@@ -40,11 +40,8 @@ const MainScene = () => {
   // physics
   const physics = new AmmoPhysics(scene)
   physics.debug.enable()
-  //const world = new CANNON.World()
+
   //const { factory } = physics
-
-  //var cannonDebugRenderer = new THREE.CannonDebugRenderer( scene, world );
-
 
   // init customizable vars
   const clearColor = 0x7ec0ee;
@@ -153,7 +150,6 @@ const MainScene = () => {
       let turn = (pug.userData.move!==undefined) ?  pug.userData.move.turn : 0;
       let jump = (pug.userData.move!==undefined) ?  pug.userData.move.jump : false;
 
-      //console.log(keyCode);
       switch(keyCode){
         case 32:
           jump = true;
@@ -258,7 +254,6 @@ const MainScene = () => {
     scene.add(lights.hemisphere);
 
     lights.directional = new THREE.DirectionalLight(0xffffff,0.4);
-    //directionalLight.castShadow = true;
 
     scene.add(lights.directional);
 
@@ -292,7 +287,6 @@ const MainScene = () => {
       const material = new THREE.MeshStandardMaterial();
       const mesh = new THREE.Mesh(geometry, material);
       mesh.castShadow = true;
-      //mesh.receiveShadow = true;
       mesh.position.x = 10*i;
       mesh.position.y = 2;
       scene.add(mesh);
@@ -334,7 +328,7 @@ const MainScene = () => {
   const addPug = () => {
 
     let shape;
-    loader.load(pugModel, object => {
+    loader.load('./assets/models/pug/pug.fbx', object => {
       object.traverse(child => {
         if (child.type === 'SkinnedMesh') {
           shape = createTriangleShapeByBufferGeometry(child.geometry,1);
@@ -396,8 +390,9 @@ const MainScene = () => {
 
   }
 
+
   const addTreats = () => {
-    loader.load(treatModel, object => {
+    loader.load('./assets/models/treat/treat.fbx', object => {
       object.traverse(child => {
         if (child.isMesh) {
           child.material.side = THREE.DoubleSide;
@@ -506,4 +501,4 @@ const MainScene = () => {
   document.body.appendChild( renderer.domElement );
 }
 //
-PhysicsLoader('./src/assets/ammo', () => MainScene())
+PhysicsLoader('./assets/ammo', () => MainScene())
