@@ -1,10 +1,14 @@
 var gulp          = require('gulp');
+var sass          = require('gulp-sass');
 const path = require('path');
 var browserSync   = require('browser-sync').create();
 var webpackStream =require('webpack-stream');
 var webpack2      = require('webpack');
 
 var concat = require('gulp-concat');
+
+//sass.compiler = require('dart-sass');
+
 
 let webpackConfig = {
   module: {
@@ -48,14 +52,39 @@ function serve() {
   });
 
   //gulp.watch("app/js/*.js", javascript);
-  gulp.watch("src/*.js").on('change', javascript);
+  gulp.watch("src/*.js").on('change', gulp.series(javascript, browserSync.reload));
   gulp.watch('src/index.html').on('change', browserSync.reload)
-  //gulp.watch("library/src/scss/**/*.scss", sass);
+  gulp.watch("src/**/*.css", css);
+  // gulp.watch("src/**/*.scss", sass);
   //gulp.watch("*.php").on('change', browserSync.reload);
+}
+
+function sass() {
+  return gulp.src('src/*.scss')
+    .pipe(sass())
+    .on('error', (err) => {
+      console.log(err.message);
+      //this.emit('end'); // Recover from errors
+    })
+    .pipe(gulp.dest('src/dist'))
+    .pipe(browserSync.stream());
+}
+
+
+function css() {
+  return gulp.src('src/*.css')
+    //.pipe(sass())
+    // .on('error', (err) => {
+    //   console.log(err.message);
+    //   this.emit('end'); // Recover from errors
+    // })
+    //.pipe(gulp.dest('src/dist'))
+    .pipe(browserSync.stream());
 }
 
 
 gulp.task('javascript', javascript);
-// gulp.task('sass', sass);
+gulp.task('sass', sass);
+gulp.task('css', css);
 // gulp.task('serve', gulp.series('sass',serve));
-gulp.task('default', gulp.series('javascript', serve));
+gulp.task('default', serve);

@@ -9,7 +9,7 @@
 
 //import * as THREE from 'three';
 import { THREE } from 'enable3d'
-import { AmmoPhysics, ExtendedMesh, PhysicsLoader } from '@enable3d/ammo-physics'
+import { AmmoPhysics, ExtendedMesh, PhysicsLoader, ExtendedObject3D } from '@enable3d/ammo-physics'
 
 
 
@@ -327,17 +327,21 @@ const MainScene = () => {
 
   const addPug = () => {
 
-    let shape;
+
     loader.load('./assets/models/pug/pug.fbx', object => {
+
+      //let mesh;
       object.traverse(child => {
         if (child.type === 'SkinnedMesh') {
-          shape = createTriangleShapeByBufferGeometry(child.geometry,1);
+
+          if (child.isMesh) {
+            child.material.side = THREE.DoubleSide;
+            child.material.shininess = 0.1;
+            child.castShadow = true;
+          }
+          //mesh = child;
         }
-        if (child.isMesh) {
-          child.material.side = THREE.DoubleSide;
-          child.material.shininess = 0.1;
-          child.castShadow = true;
-        }
+
       })
 
 
@@ -357,16 +361,17 @@ const MainScene = () => {
       mixers.push(mixer);
       object.scale.multiplyScalar(0.2);
       //object.rotateY(Math.PI/2);
-      pug = new THREE.Object3D();
+      pug = new ExtendedObject3D();
+      //pug.add(mesh.clone());
       pug.position.x = -20;
       pug.position.y = 10.5;
 
       pug.add(object);
-      pug.add(shape);
-      physics.add.existing(pug);
+
+      physics.add.existing(pug,  { addChildren: false, shape: 'convexMesh' });
       pug.body.setAngularFactor( 0, 1, 0 );
       pug.body.on.collision((otherObject, event) => {
-        //console.log(otherObject.name);
+//        console.log(otherObject.name);
         if (otherObject.name === 'body_id_19') { // ground
           pug.userData.jumping = false;
           if (pug.userData.move) pug.userData.move.jump = false;
@@ -411,7 +416,7 @@ const MainScene = () => {
         treat.position.y = Math.random() * 80;
         treat.rotation.y = Math.random() * offset - 1 - offset/2;
         treat.position.z = Math.random() * offset - 1 - offset/2;
-        physics.add.existing(treat)
+        physics.add.existing(treat, { shape: 'box', width: 20, height: 20, depth: 20 })
 
         treats.push(treat);
       }
@@ -463,7 +468,8 @@ const MainScene = () => {
 
           pug.body.setVelocity(x, y, z)
         }
-        const turnFactor = pug.userData.move.forward >= 0 ? -1 : 1;
+        let turnFactor = pug.userData.move.forward >= 0 ? -1 : 1;
+        if (pug.userData.move.forward && pug.userData.move.forward !== 0) turnFactor = turnFactor * 2;
         pug.body.setAngularVelocityY(turnFactor*pug.userData.move.turn )
       }
 

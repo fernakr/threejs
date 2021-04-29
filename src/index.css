@@ -1,0 +1,17 @@
+.healthbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 200px;
+  height: 40px;
+  border: 1px solid #000;
+}
+
+.healthbar-inner{
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: red;
+  height: 100%;
+
+}
