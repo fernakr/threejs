@@ -416,7 +416,7 @@ const MainScene = () => {
         treat.position.y = Math.random() * 80;
         treat.rotation.y = Math.random() * offset - 1 - offset/2;
         treat.position.z = Math.random() * offset - 1 - offset/2;
-        physics.add.existing(treat, { shape: 'box', width: 20, height: 20, depth: 20 })
+        physics.add.existing(treat, { shape: 'box', width: 40, height: 17, depth: 20 })
 
         treats.push(treat);
       }
