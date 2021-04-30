@@ -382,6 +382,7 @@ const MainScene = () => {
         }else if (otherObject.name === 'treat'){
           timeRemaining += 0.5;
           if (health < 100) health += 0.5;         
+          if (health > 100) health = 100;
           treats = treats.filter(function(treat){ 
             return treat.id !== otherObject.id
           });
@@ -506,6 +507,7 @@ const MainScene = () => {
     
 
     if (timeRemaining > 0 ) timeRemaining -= clock.getElapsedTime()/1000;
+    if (timeRemaining < 0) timeRemaining = 0;
     timeElem.textContent = timeRemaining.toFixed(2);
 
     remainingElem.textContent = treats.length;
