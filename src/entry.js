@@ -45,6 +45,13 @@ const MainScene = () => {
   let currHealth;
   const healthElem = document.getElementById('healthbar');  
 
+  const treatsTotal = 200;
+  //let remaining = treatsTotal
+  const remainingElem = document.getElementById('remaining');  
+  const total = document.getElementById('total');  
+  remainingElem.textContent = treatsTotal;
+  total.textContent = treatsTotal;
+
   // physics
   const physics = new AmmoPhysics(scene)
   //physics.debug.enable()
@@ -298,6 +305,7 @@ const MainScene = () => {
       mesh.position.x = 10*i;
       mesh.position.y = 2;
       scene.add(mesh);
+      mesh.name = 'bush';
       physics.add.existing(mesh)
 
     }
@@ -315,21 +323,6 @@ const MainScene = () => {
 
     physics.add.ground({ width: 2000, height: 2000 })
   }
-  const createTriangleShapeByBufferGeometry = (geometry, scalingFactor) => {
-    var mesh = new Ammo.btTriangleMesh(true, true);
-    var vertexPositionArray = geometry.attributes.position.array;
-    for (var i = 0; i < geometry.attributes.position.count/3; i++) {
-            mesh.addTriangle(
-                new Ammo.btVector3(vertexPositionArray[i*9+0]*scalingFactor, vertexPositionArray[i*9+1]*scalingFactor, vertexPositionArray[i*9+2]*scalingFactor ),
-                new Ammo.btVector3(vertexPositionArray[i*9+3]*scalingFactor, vertexPositionArray[i*9+4]*scalingFactor, vertexPositionArray[i*9+5]*scalingFactor),
-                new Ammo.btVector3(vertexPositionArray[i*9+6]*scalingFactor, vertexPositionArray[i*9+7]*scalingFactor, vertexPositionArray[i*9+8]*scalingFactor),
-                false
-            );
-    }
-    var shape = new Ammo.btBvhTriangleMeshShape(mesh, true, true);
-    return shape;
-}
-
 
 
 
@@ -376,7 +369,7 @@ const MainScene = () => {
 
       pug.add(object);
 
-      physics.add.existing(pug,  { addChildren: false, shape: 'convexMesh' });
+      physics.add.existing(pug,  { addChildren: false, shape: 'convexMesh', mass: 20 });
       pug.body.setAngularFactor( 0, 1, 0 );
       pug.body.on.collision((otherObject, event) => {
 //        console.log(otherObject.name);
@@ -384,6 +377,19 @@ const MainScene = () => {
           pug.userData.jumping = false;
           if (pug.userData.move) pug.userData.move.jump = false;
           updateAnimation();
+        }else if (otherObject.name === 'bush'){          
+          health -= 10;
+        }else if (otherObject.name === 'treat'){
+          timeRemaining += 0.5;
+          if (health < 100) health += 0.5;         
+          treats = treats.filter(function(treat){ 
+            return treat.id !== otherObject.id
+          });
+     
+          scene.remove( otherObject );
+          
+          console.log(otherObject);
+          //remaining--;
         }
       })
 
@@ -416,16 +422,18 @@ const MainScene = () => {
       object.scale.multiplyScalar(0.05);
 
       const offset = 100;
-      for (let i = 0; i < 200; i++){
+      for (let i = 0; i < treatsTotal; i++){
         let treat = object.clone();
 
+        
         scene.add(treat);
+        treat.name = 'treat';
         treat.position.x = Math.random() * offset - 1 - offset/2;
         treat.position.y = Math.random() * 80;
         treat.rotation.y = Math.random() * offset - 1 - offset/2;
         treat.position.z = Math.random() * offset - 1 - offset/2;
         physics.add.existing(treat, { shape: 'box', width: 40, height: 17, depth: 20 })
-
+        treat.body.checkCollisions = true
         treats.push(treat);
       }
 
@@ -476,7 +484,7 @@ const MainScene = () => {
 
           pug.body.setVelocity(x, y, z)
         }
-        let turnFactor = pug.userData.move.forward >= 0 ? -1 : 1;
+        let turnFactor = pug.userData.move.forward >= 0 ? -2 : 2;
         if (pug.userData.move.forward && pug.userData.move.forward !== 0) turnFactor = turnFactor * 2;
         pug.body.setAngularVelocityY(turnFactor*pug.userData.move.turn )
       }
@@ -497,8 +505,10 @@ const MainScene = () => {
 
     
 
-    timeRemaining -= clock.getElapsedTime()/1000;
+    if (timeRemaining > 0 ) timeRemaining -= clock.getElapsedTime()/1000;
     timeElem.textContent = timeRemaining.toFixed(2);
+
+    remainingElem.textContent = treats.length;
 
 //    console.log(healthElem);
     if (health !== currHealth){
@@ -507,7 +517,7 @@ const MainScene = () => {
     }
     
 
-    if (timeRemaining <= 0 && !paused){
+    if ((timeRemaining <= 0 || health <= 0 ) && !paused){
       alert('game over');
       paused = true;
     }
