@@ -52,6 +52,8 @@ const MainScene = () => {
   remainingElem.textContent = treatsTotal;
   total.textContent = treatsTotal;
 
+  const gameOverElem = document.getElementById('game-over');
+
   // physics
   const physics = new AmmoPhysics(scene)
   //physics.debug.enable()
@@ -433,7 +435,7 @@ const MainScene = () => {
         treat.position.y = Math.random() * 80;
         treat.rotation.y = Math.random() * offset - 1 - offset/2;
         treat.position.z = Math.random() * offset - 1 - offset/2;
-        physics.add.existing(treat, { shape: 'box', width: 40, height: 17, depth: 20 })
+        physics.add.existing(treat, { shape: 'box', mass: 3, width: 40, height: 17, depth: 20 })
         treat.body.checkCollisions = true
         treats.push(treat);
       }
@@ -506,7 +508,7 @@ const MainScene = () => {
 
     
 
-    if (timeRemaining > 0 ) timeRemaining -= clock.getElapsedTime()/1000;
+    if (timeRemaining > 0 && !paused ) timeRemaining -= clock.getElapsedTime()/1000;
     if (timeRemaining < 0) timeRemaining = 0;
     timeElem.textContent = timeRemaining.toFixed(2);
 
@@ -520,7 +522,7 @@ const MainScene = () => {
     
 
     if ((timeRemaining <= 0 || health <= 0 ) && !paused){
-      alert('game over');
+      gameOverElem.style.display = 'flex';
       paused = true;
     }
     renderer.render(scene, cameraPug);
